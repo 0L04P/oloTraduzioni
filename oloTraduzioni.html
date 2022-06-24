@@ -17,33 +17,49 @@
     border: solid 1px white;
     margin-top: 0.5px;
 }
+.tradInput{
+	height: 75px;   
+    width: 100% !important;
+}
 </style>
  
 <body  style = "background-color:#123456; color:#ffffff;">
-	<div class="container" style="">
+	<div class="container" class="trad">
 		<h4 id="titolo" style="color:#9ed519; margin-bottom: -20px">Traduttore</h4>
 		<div class='col-xs-12' style='height:40px;'></div>
 		<div class='col-xs-12'>
-			<input id="txtDaTrad" class="form-control" style="width:200px">
-			<br>
-			<button class='btn btn-info' onclick='Traduzione(); '>TRADUCI</button>
+			<input id="txtDaTrad" class="form-control tradInput" style="width:200px">
+			<br>			
+			<button class='btn btn-info' onclick='Traduzione(); '><span class='glyphicon glyphicon-search'></span> TRADUCI</button>
+			<button class='btn btn-warning' onclick='Gioca()'><span class='glyphicon glyphicon-play-circle'></span>  GIOCA</button>
+			<button class='btn btn-warning' onclick='Visualizza()'><span class='glyphicon glyphicon-adjust'></span></button>
 		</div>
-		
-		<div class='col-xs-12'>
+		<br>
+			<br>
+		<div class='col-xs-12  ' id='divTraduzioni' style='margin-left: 20px; width: 300px;'>			
 			<label id="lblTraduzione1" style="color:#9da2d7"></label><br>
 			<label id="lblTraduzione2" style="color:#e1e1d3"></label>
 		</div>
+		<div class='col-xs-12' id='divAggTraduzioni'>
+			<br>
+			<input id="txtNuovaTrad" class="form-control tradInput" style="width:200px; height:50px;">			
+			<button class='btn btn-primary' onclick='Aggiungi(); '>AGGIUNGI</button>			
+		</div>
 		
-		<div class='col-xs-12' id="elenco">
+		
+		<div class='col-xs-12' id="elenco" style="margin-top:10px;">
 			 
 		</div>
 		
 	</div> 
+	
+ 
+	
 	<script>	
 	$(document).ready(function(){
 	 
 		if(localStorage["olo_Traduzioni"] === undefined || localStorage["olo_Traduzioni"] === 'undefined'){
-			localStorage["olo_Traduzioni"] = JSON.stringify({"Traduzioni" : []})
+			localStorage["olo_Traduzioni"] = JSON.stringify({"traduzioni" : []})
 		}
 		elenco()
 	
@@ -55,7 +71,10 @@
 			
 			}			
 	}
-	
+	function ClearLS(){
+		localStorage["olo_Traduzioni"] = undefined;
+		 location.reload();
+	}
 	function traduci1(parola){
 		$.ajax({
 				"async": true,
@@ -91,17 +110,48 @@
 			SalvaParola()
 		});
 	}
-
-	function SalvaParola(){
-	debugger;
+	function Aggiungi(){		
+		let i = 0;		
+		debugger;
+		let a = JSON.parse(localStorage["olo_Traduzioni"])
+		//for (let i = 0; i< a.length; ++i){
+		while( i< a.length){
+			if (a[i].parola == $('#txtDaTrad').val()){
+			 
+				a[i].traduzioni.push($('#txtNuovaTrad').val());
+				localStorage["olo_Traduzioni"] = JSON.stringify(a);
+				elenco()
+				return ''
+			}
+			++i;
+		}	
+		
+		if(i == a.length){
+			let objParola = {
+				"parola": $('#txtDaTrad').val(),
+				"traduzioni" : []
+			}
+			objParola.traduzioni.push($('#txtNuovaTrad').val())
+			a.push(objParola);
+			localStorage["olo_Traduzioni"] = JSON.stringify(a);
+			elenco()
+			return ''
+		}
+	}
+	
+	function SalvaParola(){	 
 		let objParola = {
 			"parola": $('#txtDaTrad').val(),
-			"traduzione_1" : $('#lblTraduzione1').text(),
-			"traduzione_2" : $('#lblTraduzione2').text()
+			"traduzioni" : []
 		}
+		
+		if($('#lblTraduzione1').text() != '') objParola.traduzioni.push($('#lblTraduzione1').text())
+		if($('#lblTraduzione1').text() != '') objParola.traduzioni.push($('#lblTraduzione1').text())
+					
 		//leggo il local storage e creo un oggetto ad hoc
 		let tradSalvate = JSON.parse(localStorage["olo_Traduzioni"]);
-		tradSalvate.Traduzioni.push(objParola)
+		
+		tradSalvate.push(objParola)
 		
 		//rendo l'oggetto javascript una stringa
 		localStorage["olo_Traduzioni"] = JSON.stringify(tradSalvate);		
@@ -111,18 +161,33 @@
 	
 	function elenco(){
 	//$('#elenco').fadeOut()
-	a = JSON.parse(localStorage["olo_Traduzioni"]).Traduzioni
+	a = JSON.parse(localStorage["olo_Traduzioni"])
 	let sHTML = ''
 		for (i=a.length -1; i>= 0; --i){
 			sHTML += '<div class="col-xs-12 parolaCercata">'
 			sHTML += '<b>' + a[i].parola  + '</b><br>'
-			sHTML += a[i].traduzione_1 +'<br>'
-			if(a[i].traduzione_2 != a[i].traduzione_1) sHTML +=  a[i].traduzione_2
+			//sHTML += a[i].traduzione_1 +'<br>'
+			//if(a[i].traduzione_2 != a[i].traduzione_1) sHTML +=  a[i].traduzione_2
+			for (j = 0; j< a[i].traduzioni.length; ++j){
+				sHTML += a[i].traduzioni[j] +'<br>'
+			}
 			sHTML += '</div>'						
 		}
 		 
 		$('#elenco').html(sHTML)
 		$('#elenco').fadeIn()
+	}
+	
+	function Gioca(){ 
+		let a = [...JSON.parse(localStorage["olo_Traduzioni"])]
+		let i = Math.floor(Math.random() * a.length);
+		$('#txtDaTrad').val(a[i].parola)
+		$('#lblTraduzione1').text(a[i].traduzioni)
+		$('#lblTraduzione1').css('display', 'none');
+	}
+	
+	function Visualizza(){
+		$('#lblTraduzione1').css('display', '');
 	}
 	</script>
 
