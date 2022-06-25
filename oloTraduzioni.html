@@ -50,7 +50,7 @@
 		<div class='col-xs-12' id="elenco" style="margin-top:10px;">
 			 
 		</div>
-		
+		<button onclick='CLEAR_LS();' class='btn btn-danger'>PULISCI LOCAL STORAGE</button>
 	</div> 
 	
  
@@ -113,7 +113,7 @@
 	function Aggiungi(){		
 		let i = 0;		
 		debugger;
-		let a = JSON.parse(localStorage["olo_Traduzioni"])
+		let a = JSON.parse(localStorage["olo_Traduzioni"]).traduzioni
 		//for (let i = 0; i< a.length; ++i){
 		while( i< a.length){
 			if (a[i].parola == $('#txtDaTrad').val()){
@@ -149,9 +149,11 @@
 		if($('#lblTraduzione1').text() != '') objParola.traduzioni.push($('#lblTraduzione1').text())
 					
 		//leggo il local storage e creo un oggetto ad hoc
+		debugger;
 		let tradSalvate = JSON.parse(localStorage["olo_Traduzioni"]);
 		
-		tradSalvate.push(objParola)
+		tradSalvate.traduzioni.push(objParola)
+
 		
 		//rendo l'oggetto javascript una stringa
 		localStorage["olo_Traduzioni"] = JSON.stringify(tradSalvate);		
@@ -188,6 +190,12 @@
 	
 	function Visualizza(){
 		$('#lblTraduzione1').css('display', '');
+	}
+	
+	function CLEAR_LS(){
+		localStorage["olo_Traduzioni"] = undefined
+		location.reload();
+	
 	}
 	</script>
 
