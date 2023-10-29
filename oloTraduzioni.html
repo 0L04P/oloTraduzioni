@@ -8,7 +8,12 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-
+  <script src='oloTraduzioni.js'></script>
+  
+	<link rel="icon" href="icona.png" sizes="32x32"/>
+	<link rel="icon" href="icona.png" sizes="192x192"/>
+	<link rel="apple-touch-icon" href="icona.png"/>
+	<link rel="manifest" href="manifest.json">
 </head>
 
 <style>
@@ -20,6 +25,7 @@
 .tradInput{
 	height: 75px;   
     width: 100% !important;
+	font-size:20px;
 }
 </style>
  
@@ -37,167 +43,31 @@
 		<br>
 			<br>
 		<div class='col-xs-12  ' id='divTraduzioni' style='margin-left: 20px; width: 300px;'>			
-			<label id="lblTraduzione1" style="color:#9da2d7"></label><br>
-			<label id="lblTraduzione2" style="color:#e1e1d3"></label>
+			<label id="lblTraduzione" style="color:#9da2d7; white-space: pre;"></label><br>			
 		</div>
 		<div class='col-xs-12' id='divAggTraduzioni'>
 			<br>
 			<input id="txtNuovaTrad" class="form-control tradInput" style="width:200px; height:50px;">			
-			<button class='btn btn-primary' onclick='Aggiungi(); '>AGGIUNGI</button>			
+			<button class='btn btn-primary' onclick='Aggiungi(); '>AGGIUNGI</button>	
+							
 		</div>
-		
-		
+		<div class='col-xs-12' id='divGioco'>
+			<input id="txtRisposta" class="form-control tradInput" style="width:200px; background: #2cdf61">
+			<button class='btn btn-success' onclick='Rispondi(); '>RISPONDI</button>				
+		</div>
 		<div class='col-xs-12' id="elenco" style="margin-top:10px;">
 			 
 		</div>
-		<button onclick='CLEAR_LS();' class='btn btn-danger'>PULISCI LOCAL STORAGE</button>
+		<button onclick='CLEAR_LS();' class='btn btn-danger'>PULISCI DATI SALVATI</button>
 	</div> 
 	
  
 	
-	<script>	
-	$(document).ready(function(){
-	 
-		if(localStorage["olo_Traduzioni"] === undefined || localStorage["olo_Traduzioni"] === 'undefined'){
-			localStorage["olo_Traduzioni"] = JSON.stringify({"traduzioni" : []})
-		}
-		elenco()
-	
-	})
-	function Traduzione(){
-		if($("#txtDaTrad").val()!=''){
-			traduci1($("#txtDaTrad").val()); 
-			
-			
-			}			
+<script>
+	if('serviceWorker' in navigator) {
+	  navigator.serviceWorker.register('/sw.js', { scope: '/' });
 	}
-	function ClearLS(){
-		localStorage["olo_Traduzioni"] = undefined;
-		 location.reload();
-	}
-	function traduci1(parola){
-		$.ajax({
-				"async": true,
-				"crossDomain": true,
-				"url": "https://api-free.deepl.com/v2/translate?auth_key=dc6eafa4-0e52-a48c-fd59-0be0dabbc96a:fx&text=" + parola +"&target_lang=IT",
-				"method": "POST",			
-				success: function(output, status, xhr) { 		 							 
-					console.log(output.translations[0].text);
-					$('#lblTraduzione1').text(output.translations[0].text);
-					traduci2($("#txtDaTrad").val());
-				 },
-				 error: function(output) {				  
-					//console.log("Error in API call:" + output);
-					alert("Error in API call" )
-					}		
-			  });
-	}
-	function traduci2(parola, linguaDa = 'en', linguaA = 'it'){
-		const settings = {
-			'async': true,
-			'crossDomain': true,
-			'url': 'https://translated-mymemory---translation-memory.p.rapidapi.com/api/get?langpair=' + linguaDa +'%7C'+ linguaA +'&q=' + parola + '&mt=1&onlyprivate=0&de=a%40b.c',
-			'method': 'GET',
-			'headers': {
-				'X-RapidAPI-Key': '501224a88dmsh2fcbd7f640a6f54p123732jsn90242d2d745c',
-				'X-RapidAPI-Host': 'translated-mymemory---translation-memory.p.rapidapi.com'
-			}
-		};
-
-		$.ajax(settings).done(function (response) {
-			console.log(response.responseData.translatedText);
-			$('#lblTraduzione2').text(response.responseData.translatedText)
-			SalvaParola()
-		});
-	}
-	function Aggiungi(){		
-		let i = 0;		
-		debugger;
-		let a = JSON.parse(localStorage["olo_Traduzioni"]).traduzioni
-		//for (let i = 0; i< a.length; ++i){
-		while( i< a.length){
-			if (a[i].parola == $('#txtDaTrad').val()){
-			 
-				a[i].traduzioni.push($('#txtNuovaTrad').val());
-				localStorage["olo_Traduzioni"] = JSON.stringify(a);
-				elenco()
-				return ''
-			}
-			++i;
-		}	
-		
-		if(i == a.length){
-			let objParola = {
-				"parola": $('#txtDaTrad').val(),
-				"traduzioni" : []
-			}
-			objParola.traduzioni.push($('#txtNuovaTrad').val())
-			a.push(objParola);
-			localStorage["olo_Traduzioni"] = JSON.stringify(a);
-			elenco()
-			return ''
-		}
-	}
-	
-	function SalvaParola(){	 
-		let objParola = {
-			"parola": $('#txtDaTrad').val(),
-			"traduzioni" : []
-		}
-		
-		if($('#lblTraduzione1').text() != '') objParola.traduzioni.push($('#lblTraduzione1').text())
-		if($('#lblTraduzione1').text() != '') objParola.traduzioni.push($('#lblTraduzione1').text())
-					
-		//leggo il local storage e creo un oggetto ad hoc
-		debugger;
-		let tradSalvate = JSON.parse(localStorage["olo_Traduzioni"]);
-		
-		tradSalvate.traduzioni.push(objParola)
-
-		
-		//rendo l'oggetto javascript una stringa
-		localStorage["olo_Traduzioni"] = JSON.stringify(tradSalvate);		
-	elenco()
-	}	
-	
-	
-	function elenco(){
-	//$('#elenco').fadeOut()
-	a = JSON.parse(localStorage["olo_Traduzioni"])
-	let sHTML = ''
-		for (i=a.length -1; i>= 0; --i){
-			sHTML += '<div class="col-xs-12 parolaCercata">'
-			sHTML += '<b>' + a[i].parola  + '</b><br>'
-			//sHTML += a[i].traduzione_1 +'<br>'
-			//if(a[i].traduzione_2 != a[i].traduzione_1) sHTML +=  a[i].traduzione_2
-			for (j = 0; j< a[i].traduzioni.length; ++j){
-				sHTML += a[i].traduzioni[j] +'<br>'
-			}
-			sHTML += '</div>'						
-		}
-		 
-		$('#elenco').html(sHTML)
-		$('#elenco').fadeIn()
-	}
-	
-	function Gioca(){ 
-		let a = [...JSON.parse(localStorage["olo_Traduzioni"])]
-		let i = Math.floor(Math.random() * a.length);
-		$('#txtDaTrad').val(a[i].parola)
-		$('#lblTraduzione1').text(a[i].traduzioni)
-		$('#lblTraduzione1').css('display', 'none');
-	}
-	
-	function Visualizza(){
-		$('#lblTraduzione1').css('display', '');
-	}
-	
-	function CLEAR_LS(){
-		localStorage["olo_Traduzioni"] = undefined
-		location.reload();
-	
-	}
-	</script>
+</script>
 
 </body> 
 </html>
